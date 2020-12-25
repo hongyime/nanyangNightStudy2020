@@ -6,8 +6,11 @@
 # import qrcode
 # import time
 # from datetime import date, datetime
-# import hashlib
-
+import hashlib
+data = 'admin'
+b_data = bytes(data, 'utf-8') #change to byte
+hash_data = hashlib.sha512(b_data).hexdigest()
+print(hash_data)
 
 # now = datetime.now()
 # year = now.strftime("%Y")
@@ -95,10 +98,4 @@
 # string = 'helloiambryan'
 # print(string[-8:])
 
-
-clean_qr = ['NYJCa9d707fd183971f69562c92f89f5531aef04e094c552a9b0e8ffc52d233d359c9930eb02316a4e1715c0f60b6e24d1b6bb446edfcfe61d4c28ea5d8c7f4e48b920201225', 'none', '']
-clean_data = "NYJCa9d707fd183971f69562c92f89f5531aef04e094c552a9b0e8ffc52d233d359c9930eb02316a4e1715c0f60b6e24d1b6bb446edfcfe61d4c28ea5d8c7f4e48b920201225"
-
-if str(clean_data) in clean_qr:
-    print('yes')
 
