@@ -1,4 +1,4 @@
-# nyjcNightStudy2020
+# nanyangNightStudy2020
 code that returns the nearest car park in Singapore given a pair of coordinates.
 
 <p align="left">
