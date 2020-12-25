@@ -1,5 +1,5 @@
-import os
 import sys
+import os
 from PIL import Image
 import time
 from flask import Flask, render_template, request, redirect  
