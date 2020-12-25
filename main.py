@@ -343,7 +343,7 @@ def verifyQR():
         return render_template("scan.html", error=error)
 
 @app.route('/scanQR')
-def video_feed():
+def scanQR():
     return Response(gen(VideoCamera()),
 		mimetype='multipart/x-mixed-replace; boundary=frame')
 
