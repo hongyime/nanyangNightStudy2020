@@ -6,7 +6,7 @@
         <meta http-equiv='expires' content='0'> 
         <meta http-equiv='pragma' content='no-cache'> 
         <title>
-            NYJC NIGHT STUDY QR ADMIN PANEL
+            NYJC NIGHT STUDY QR GENERATOR
         </title>
         <link href='https://fonts.googleapis.com/css?fam  ily=Pacifico' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
@@ -37,35 +37,26 @@
                 margin-right: auto;
                 padding: 13px;
             }
-            .error {
+            /* .error {
                 color: white;
                 margin-left: auto;
                 margin-right: auto;
                 max-width: 300px;
-            }
+            } */
             h2 {
                 font-size: 40px;
+                text-align: center;
             }
             h3 {
                 font-size: 20px;
             }
-
         </style>
     </head>
     <body>
-        
-        <div class="input">
-            <h2>NYJC NIGHT STUDY QR ADMIN PANEL</h2>
-            <form id='form1' action='/login' method="POST">
-                <input type="text" name="username" placeholder="Username" required="required" value="{{request.form.username}}"/>
-                <input type="password" name="password" placeholder="Password" required="required" value="{{request.form.password}}"/>
-                <button id="button" type="submit" class="btn btn-primary btn-block btn-large">Login</button>
-            </form>
+        <h2>NYJC NIGHT STUDY QR GENERATOR</h2>
+        <div class = input>
+            <label><h3>Sorry, all the food has been redeemed.</h3></label>
         </div>
-        <div class = error>
-            {% if error is not none %}
-            <h3>{{ error }}</h3>
-            {% endif %}
-        </div>
+        <h3>This site is created by Bryan Seah from 2011.</h3>
     </body>
 </html>

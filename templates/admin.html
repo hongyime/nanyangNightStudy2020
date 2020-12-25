@@ -6,7 +6,7 @@
         <meta http-equiv='expires' content='0'> 
         <meta http-equiv='pragma' content='no-cache'> 
         <title>
-            NYJC NIGHT STUDY QR
+            NYJC NIGHT STUDY QR ADMIN PANEL
         </title>
         <link href='https://fonts.googleapis.com/css?fam  ily=Pacifico' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
@@ -22,6 +22,7 @@
                 max-width: 400px;
                 margin-left: auto;
                 margin-right: auto;
+                padding: 13px;
             }
             #form2{
                 max-width: 240px;
@@ -52,24 +53,32 @@
     </head>
     <body>
         <div class = input>
-            <h2>NYJC Night Study QR</h2>
-            </label><h3>Admin Panel</h3></label>
+            <h2>NYJC NIGHT STUDY QR ADMIN PANEL</h2>
+
+            <div class = error>
+                {% if error is not none %}
+                <h3>{{ error }}</h3>
+                {% endif %}
+            </div>
+
             <form id='form1' action='/start' method='GET'>
-                <label><h3>Number of QR codes allowed:</h3></label>
-                <input type="text" name='limit'>
+                <label><h3>Number of QR codes for today</h3></label>
+                <input type="number" name='limit'>
                 <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Start</button>
             </form>
-            <form action='/logout' method='GET'>
-                <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Log out</button>
-            </form>
-            <form action='/stop' method='GET'>
+
+            <form id='form2' action='/stop' method='GET'>
                 <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Stop</button>
             </form>
+
+            <form id='form2' action='/verify' method='GET'>
+                <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Verify</button>
+            </form>
+
+            <form id='form2' action='/logout' method='GET'>
+                <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Logout</button>
+            </form>
         </div>
-        <div class = error>
-            {% if error is not none %}
-            <h3>{{ error }}</h3>
-            {% endif %}
-        </div>
+
     </body>
 </html>
