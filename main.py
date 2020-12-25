@@ -342,8 +342,8 @@ def verifyQR():
         error = 'No image uploaded, please try again.'
         return render_template("scan.html", error=error)
 
-@app.route('/scanQR')
-def scanQR():
+@app.route('/video_feed')
+def video_feed():
     return Response(gen(VideoCamera()),
 		mimetype='multipart/x-mixed-replace; boundary=frame')
 
