@@ -69,7 +69,7 @@ def hash_unicode(data): # data is a str
         print('data is not an integer')
 
 def build_data(hash):
-    data = f'{placeholder}{hash}{year}{month}{day}' # always check last 8 digits agaist current date
+    data = f'{placeholder}{hash}{year}{month}{day}'
     return data
 
 def encode_qr(data):
@@ -103,7 +103,6 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['MAX_CONTENT_LENGTH'] = 2048 * 2048
 app.config['UPLOAD_EXTENSIONS'] = ['.png', ".PNG", '.JPEG', '.JPG', ".jpeg", ".jpg"]
 correct_user, correct_pass, start, login, limit = admin_details()
-print(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
 
 @app.after_request
 def add_header(r):
@@ -164,16 +163,28 @@ def login():
         f.write('\n')
         f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
     if request.method == "POST":
-        if request.form['username'] == correct_user and request.form['password'] == correct_pass:
-            with open('static/login.txt', 'w') as f:
-                f.write("username:password:start:login:limit")
-                f.write('\n')
-                login = "True"
-                print(correct_pass)
-                print(correct_user)
-                f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-            return redirect(url_for("admin"))
-        else:
+        try:
+            input_user = request.form['username']
+            b_input_user = bytes(str(input_user), 'utf-8') #change to byte
+            hash_input_user = hashlib.sha512(b_input_user).hexdigest()
+            
+            input_pass = request.form['password']
+            b_input_pass = bytes(str(input_pass), 'utf-8') #change to byte
+            hash_input_pass = hashlib.sha512(b_input_pass).hexdigest()
+            
+            if hash_input_user == correct_user and hash_input_pass == correct_pass:
+                with open('static/login.txt', 'w') as f:
+                    f.write("username:password:start:login:limit")
+                    f.write('\n')
+                    login = "True"
+                    print(correct_pass)
+                    print(correct_user)
+                    f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
+                return redirect(url_for("admin"))
+            else:
+                error = "Invalid credentials."
+                return render_template("login.html", error=error)
+        except:
             error = "Invalid credentials."
             return render_template("login.html", error=error)
     else:
