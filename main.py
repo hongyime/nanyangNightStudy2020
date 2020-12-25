@@ -1,4 +1,5 @@
 import os
+import sys
 from PIL import Image
 import time
 from flask import Flask, render_template, request, redirect  
@@ -8,9 +9,11 @@ from main import app
 from pyzbar.pyzbar import decode
 from PIL import Image
 import qrcode
+import cv2
 import time
 from datetime import datetime
 import hashlib
+from camera import VideoCamera
 
 now = datetime.now()
 year = now.strftime("%Y")
@@ -22,6 +25,13 @@ second = now.strftime("%S")
 placeholder =  "NYJC" #can change
 
 ''' METHODS'''
+
+def gen(camera):
+    while True:
+        #get camera frame
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 def admin_details():
     with open('static/login.txt', 'r') as f:
@@ -80,11 +90,10 @@ def encode_qr(data):
         f.write(data)
         f.write('\n')
 
-def decode_qr(data):
-    img = decode(Image.open(f'static/{data}.png'))
+def decode_qr(uploaded_file):
+    img = decode(Image.open(uploaded_file))
     full_data = img[0][0]
     clean_data = str(full_data, 'utf-8')
-    print(clean_data)
     return clean_data
 
 ''' START OF APP '''
@@ -116,55 +125,46 @@ def add_header(response):
 @app.route('/', methods=['POST','GET'])
 def root():
     correct_user, correct_pass, start, login, limit = admin_details()
-    print(type(start))
-    if start == 'False':
+    if start == 'False' or int(limit) <= 0:
         return render_template('error.html')
-    elif start == "True":
-        imagepath = os.path.join(app.root_path, "static")
-        app_path = os.path.join(app.root_path)
-        if os.path.exists(imagepath) == True:
-            for name in os.listdir(imagepath):
-                if 'NYJC' in name:
-                    path = os.path.join(app.root_path, 'static', name)
-                    os.remove(path)
-                else:
-                    pass
-        return render_template('generate.html')
+    elif start == "True" and int(limit) > 0:
+        with open('static/qrcodes.txt', 'r') as f:
+            clean_qrcodes = f.read().splitlines()
+        error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
+        return render_template('generate.html', error=error)
     else:
         return render_template('error.html')
 
 @app.route('/display', methods=['POST','GET'])
 def display():
-    string = build_string(limit)
-    unicode = ord_string(string)
-    hash = hash_unicode(unicode)
-    data = build_data(hash)
-    encode_qr(data)
-    filename = data + '.png'
-    imagepath = os.path.join(app.root_path, "static", filename)
-    print(imagepath)
-    app_path = os.path.join(app.root_path)
-    return render_template("display.html", filename=filename)
+    correct_user, correct_pass, start, login, limit = admin_details()
+    with open('static/qrcodes.txt', 'r') as f:
+        clean_qrcodes = f.read().splitlines()
+    if start == "True" and int(limit) > 0 and len(clean_qrcodes) < int(limit):
+        string = build_string(limit)
+        unicode = ord_string(string)
+        hash = hash_unicode(unicode)
+        data = build_data(hash)
+        encode_qr(data)
+        filename = data + '.png'
+        imagepath = os.path.join(app.root_path, "static", filename)
+        print(imagepath)
+        return render_template("display.html", filename=filename)
+    elif len(clean_qrcodes) >= int(limit):
+        return render_template("limit.html")
+    else:
+        return render_template("error.html")
 
 @app.route('/login', methods=['POST','GET'])
 def login():
+    correct_user, correct_pass, start, login, limit = admin_details()
     login = 'False'
     with open('static/login.txt', 'w') as f:
         f.write("username:password:start:login:limit")
         f.write('\n')
         f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-    error = "Please input correct username and password."
-    return render_template("login.html", error=error)
-
-@app.route('/verify', methods=['POST','GET'])
-def verify():
-    correct_user, correct_pass, start, login, limit = admin_details()
-    if 'username' and 'password' in request.args:
-        username = request.args.get("username")
-        password = request.args.get("password")
-        print(username)
-        print(password)
-        if username == correct_user and password == correct_pass:
+    if request.method == "POST":
+        if request.form['username'] == correct_user and request.form['password'] == correct_pass:
             with open('static/login.txt', 'w') as f:
                 f.write("username:password:start:login:limit")
                 f.write('\n')
@@ -172,20 +172,21 @@ def verify():
                 print(correct_pass)
                 print(correct_user)
                 f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-            return render_template("admin.html")
+            return redirect(url_for("admin"))
         else:
-            return redirect('/login')
+            error = "Invalid credentials."
+            return render_template("login.html", error=error)
     else:
-        return redirect('/login')
+        return render_template("login.html")
 
 @app.route('/admin', methods=['POST','GET'])
 def admin():
     correct_user, correct_pass, start, login, limit = admin_details()
-    # if login == "True":
-    #     return redirect('/login')
+    if login == "True":
+        return render_template("admin.html")
+    else:
+        return redirect(url_for("login"))
     
-    return render_template("admin.html")
-
 @app.route('/logout', methods=['POST','GET'])
 def logout():
     correct_user, correct_pass, start, login, limit = admin_details()
@@ -199,20 +200,47 @@ def logout():
 
 @app.route('/start', methods=['POST','GET'])
 def start():
+
     correct_user, correct_pass, start, login, limit = admin_details()
     if 'limit' in request.args:
         limit = request.args.get("limit")
-        print(limit)
-        limit = str(limit)
-        start = "True"
+        print(type(limit))
+        if limit == '':
+            limit = "0"
+            with open('static/login.txt', 'w') as f:
+                f.write("username:password:start:login:limit")
+                f.write('\n')
+                f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
+            error = "Please input value for limit of QR Codes."
+            return render_template("admin.html", error = error)
+        else:
+            limit = str(limit)
+            start = "True"
+            with open('static/login.txt', 'w') as f:
+                f.write("username:password:start:login:limit")
+                f.write('\n')
+                f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
+            error = f"You have set limit for QR Codes to be {limit}."
+            with open('static/qrcodes.txt', 'w') as f:
+                pass
+            imagepath = os.path.join(app.root_path, "static")
+            if os.path.exists(imagepath) == True:
+                for name in os.listdir(imagepath):
+                    if 'NYJC' in name:
+                        path = os.path.join(app.root_path, 'static', name)
+                        os.remove(path)
+                    else:
+                        pass
+            return render_template("admin.html", error = error)
+    else:
+        limit = '0'
+        start = "False"
         with open('static/login.txt', 'w') as f:
             f.write("username:password:start:login:limit")
             f.write('\n')
             f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-        error = f"You have set limit for QR codes to be {limit}"
-        return render_template("admin.html", error = error)
-    else:
-        return redirect("/admin")
+        error = "Please input value for limit of QR Codes."
+        return render_template("admin.html", error=error)
 
 @app.route('/stop', methods=['POST','GET'])
 def stop():
@@ -224,9 +252,95 @@ def stop():
             start = "False"
             limit = '0'
             f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-        return render_template("admin.html")
+        with open('static/qrcodes.txt', 'w') as f:
+            pass
+        imagepath = os.path.join(app.root_path, "static")
+        if os.path.exists(imagepath) == True:
+            for name in os.listdir(imagepath):
+                if 'NYJC' in name:
+                    path = os.path.join(app.root_path, 'static', name)
+                    os.remove(path)
+                else:
+                    pass
+        error = f"You have stopped reset limit for QR codes to be 0."
+        return render_template("admin.html", error=error)
     else:
-        return redirect("/admin")
+        with open('static/qrcodes.txt', 'w') as f:
+            pass
+        imagepath = os.path.join(app.root_path, "static")
+        if os.path.exists(imagepath) == True:
+            for name in os.listdir(imagepath):
+                if 'NYJC' in name:
+                    path = os.path.join(app.root_path, 'static', name)
+                    os.remove(path)
+                else:
+                    pass
+        error = f"You have reset the limit for QR codes back to 0."
+        return render_template("admin.html", error=error)
+
+@app.route('/verify', methods=['POST','GET'])
+def verify():
+    correct_user, correct_pass, start, login, limit = admin_details()
+    if int(limit) > 0 and start == "True":
+        return render_template("scan.html")
+    else:
+        return render_template("error.html")
+
+@app.route('/verifyQR', methods=['POST','GET'])
+def verifyQR():
+    print(request.files)
+    uploaded_file = request.files['image']
+    print(uploaded_file)
+    uploaded = uploaded_file.filename
+    print(uploaded)
+    if uploaded != '':
+        file_ext = os.path.splitext(uploaded)[1]
+        if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+            error = 'Invalid file extension, only upload PNG or JPEG images.'
+            return render_template("scan.html", error=error)
+        else:
+
+            with open("static/qrcodes.txt", 'r') as f:
+                clean_qrcodes = f.read().splitlines()
+            
+            try:
+                clean_data = decode_qr(uploaded_file)
+                print(clean_data)
+            except:
+                error = sys.exc_info()[0]
+                return render_template("scan.html", error=error) 
+
+            if type(clean_data) is str:
+                try:
+
+                    # 1st check (if date is correct)
+                    date = clean_data[-8:]
+                    if date[0:3] == str(year) and date[-2:] == str(day) and date[4:5] == str(month):
+
+                        # 2nd check (if file exists in text file)
+                        if uploaded in clean_qrcodes:
+
+                            error = "VALID QR."
+                            return render_template("scan.html", error=error)
+                        else:
+                            error = 'INVALID QR'
+                            return render_template("scan.html", error=error)
+                    else:
+                        error = 'INVALID QR'
+                        return render_template("scan.html", error=error)    
+                except:
+                    error = sys.exc_info()[0]
+                    return render_template("scan.html", error=error) 
+            else:
+                error = 'INVALID QR'
+                return render_template("scan.html", error=error)
+    else:
+        error = 'No image uploaded, please try again.'
+        return render_template("scan.html", error=error)
+
+@app.route('/scanQR')
+def video_feed():
+    return Response(gen(VideoCamera()),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=False, threaded=True, use_reloader=True)

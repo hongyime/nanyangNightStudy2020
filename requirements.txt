@@ -25,3 +25,4 @@ viivakoodi==0.8.0
 hashlib
 qrcode==6.1
 pyzbar==0.1.8
+opencv-python==4.4.0.46

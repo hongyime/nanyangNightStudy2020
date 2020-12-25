@@ -37,30 +37,37 @@
                 margin-right: auto;
                 padding: 13px;
             }
-            .error {
+            /* .error {
                 color: white;
                 margin-left: auto;
                 margin-right: auto;
                 max-width: 300px;
-            }
+            } */
             h2 {
                 font-size: 40px;
             }
             h3 {
                 font-size: 20px;
             }
-
         </style>
     </head>
     <body>
-        
-        <div class="input">
+        <div class = input>
+            
+
             <h2>NYJC NIGHT STUDY QR ADMIN PANEL</h2>
-            <form id='form1' action='/login' method="POST">
-                <input type="text" name="username" placeholder="Username" required="required" value="{{request.form.username}}"/>
-                <input type="password" name="password" placeholder="Password" required="required" value="{{request.form.password}}"/>
-                <button id="button" type="submit" class="btn btn-primary btn-block btn-large">Login</button>
+            <label><h3>Scan a QR Code</h3></label>
+            <img id="bg" src="{{ url_for('video_feed') }}" width=auto height=auto>
+
+            <label><h3>Upload a QR Code</h3></label>
+            <form i='form1' method="POST" action="/verifyQR" enctype = "multipart/form-data">
+                <input type="file" name="image" accept="image/*">
+                <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Check</button>
+            </form>  
+            <form id='form2' action='/verify' method='GET'>
+                <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Refresh</button>
             </form>
+
         </div>
         <div class = error>
             {% if error is not none %}
