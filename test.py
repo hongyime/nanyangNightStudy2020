@@ -92,5 +92,13 @@
 # username,password,check = admin_details()
 # print(f'{username},{password}')
 
-string = 'helloiambryan'
-print(string[-8:])
+# string = 'helloiambryan'
+# print(string[-8:])
+
+
+clean_qr = ['NYJCa9d707fd183971f69562c92f89f5531aef04e094c552a9b0e8ffc52d233d359c9930eb02316a4e1715c0f60b6e24d1b6bb446edfcfe61d4c28ea5d8c7f4e48b920201225', 'none', '']
+clean_data = "NYJCa9d707fd183971f69562c92f89f5531aef04e094c552a9b0e8ffc52d233d359c9930eb02316a4e1715c0f60b6e24d1b6bb446edfcfe61d4c28ea5d8c7f4e48b920201225"
+
+if str(clean_data) in clean_qr:
+    print('yes')
+

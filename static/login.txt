@@ -1,2 +1,2 @@
 username:password:start:login:limit
-admin:admin:False:False:0
+admin:admin:True:True:4

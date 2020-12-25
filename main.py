@@ -203,24 +203,23 @@ def start():
 
     correct_user, correct_pass, start, login, limit = admin_details()
     if 'limit' in request.args:
-        limit = request.args.get("limit")
-        print(type(limit))
-        if limit == '':
-            limit = "0"
+        set_limit = request.args.get("limit")
+        if set_limit == '':
             with open('static/login.txt', 'w') as f:
                 f.write("username:password:start:login:limit")
                 f.write('\n')
+                limit = limit
                 f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-            error = "Please input value for limit of QR Codes."
+            error = f"Please input value for limit of QR Codes. Current value is {limit}"
             return render_template("admin.html", error = error)
-        else:
-            limit = str(limit)
+        elif int(set_limit) > 0:
+            set_limit = str(set_limit)
             start = "True"
             with open('static/login.txt', 'w') as f:
                 f.write("username:password:start:login:limit")
                 f.write('\n')
-                f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{limit}")
-            error = f"You have set limit for QR Codes to be {limit}."
+                f.write(f"{correct_user}:{correct_pass}:{start}:{login}:{set_limit}")
+            error = f"You have set limit for QR Codes to be {set_limit}."
             with open('static/qrcodes.txt', 'w') as f:
                 pass
             imagepath = os.path.join(app.root_path, "static")
@@ -233,7 +232,6 @@ def start():
                         pass
             return render_template("admin.html", error = error)
     else:
-        limit = '0'
         start = "False"
         with open('static/login.txt', 'w') as f:
             f.write("username:password:start:login:limit")
@@ -245,7 +243,7 @@ def start():
 @app.route('/stop', methods=['POST','GET'])
 def stop():
     correct_user, correct_pass, start, login, limit = admin_details()
-    if int(limit) > 0:
+    if int(limit) > 0 or limit == '':
         with open('static/login.txt', 'w') as f:
             f.write("username:password:start:login:limit")
             f.write('\n')
@@ -290,9 +288,8 @@ def verify():
 def verifyQR():
     print(request.files)
     uploaded_file = request.files['image']
-    print(uploaded_file)
+    print(f'uploaded file = {uploaded_file}')
     uploaded = uploaded_file.filename
-    print(uploaded)
     if uploaded != '':
         file_ext = os.path.splitext(uploaded)[1]
         if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
@@ -302,10 +299,12 @@ def verifyQR():
 
             with open("static/qrcodes.txt", 'r') as f:
                 clean_qrcodes = f.read().splitlines()
+                print(f'clean qr = {clean_qrcodes}')
             
             try:
                 clean_data = decode_qr(uploaded_file)
-                print(clean_data)
+                print(f'clean data = {clean_data}')
+                print(type(clean_data))
             except:
                 error = sys.exc_info()[0]
                 return render_template("scan.html", error=error) 
@@ -313,26 +312,20 @@ def verifyQR():
             if type(clean_data) is str:
                 try:
 
-                    # 1st check (if date is correct)
-                    date = clean_data[-8:]
-                    if date[0:3] == str(year) and date[-2:] == str(day) and date[4:5] == str(month):
+                    # 1st check (if file exists in text file)
+                    if str(clean_data) in clean_qrcodes:
 
-                        # 2nd check (if file exists in text file)
-                        if uploaded in clean_qrcodes:
-
-                            error = "VALID QR."
-                            return render_template("scan.html", error=error)
-                        else:
-                            error = 'INVALID QR'
-                            return render_template("scan.html", error=error)
+                        error = "VALID QR."
+                        return render_template("scan.html", error=error)
                     else:
-                        error = 'INVALID QR'
-                        return render_template("scan.html", error=error)    
+                        error = 'INVALID QR1'
+                        return render_template("scan.html", error=error)
+  
                 except:
                     error = sys.exc_info()[0]
                     return render_template("scan.html", error=error) 
             else:
-                error = 'INVALID QR'
+                error = 'INVALID QR3'
                 return render_template("scan.html", error=error)
     else:
         error = 'No image uploaded, please try again.'
