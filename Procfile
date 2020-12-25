@@ -1,2 +1,1 @@
-web: gunicorn main: python main.py --preload
-init: python db_create.py
+web: gunicorn main:app --preload
