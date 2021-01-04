@@ -32,26 +32,27 @@ class VideoCamera(object):
 
 	def get_frame(self):
 		while True:
+			qrcode = ''
+			qrcodes = []
 			with open("static/qrcodes.txt", 'r') as f:
-				qrcodes = f.read().splitlines()
+				qrcodes.append(f.read().splitlines())
 			success, frame = self.video.read()
 			for i in decode(frame):
-				qrcode = i.data.decode('utf-8')
+				qrcode += i.data.decode('utf-8')
 				print(qrcode)
-				if qrcode in qrcodes:
-					verification = 'VALID QR'
-					myColor = (0,255,0)
-				else:
-					verification = 'INVALID QR'
-					myColor = (0, 0, 255)
-
-				pts = np.array([i.polygon],np.int32)
-				pts = pts.reshape((-1,1,2))
-				cv2.polylines(frame,[pts],True,myColor,3)
-				pts2 = i.rect
-				cv2.putText(frame,verification,(pts2[0],pts2[1]),cv2.FONT_HERSHEY_SIMPLEX,1,myColor,2)    
+			if qrcode in qrcodes:
+				verification = 'VALID QR'
+				myColor = (0,255,0)
+			else:
+				verification = 'INVALID QR'
+				myColor = (0, 0, 255)
+				
+			pts = np.array([frame.polygon],np.int32)
+			pts = pts.reshape((-1,1,2))
+			cv2.polylines(frame,[pts],True,myColor,3)
+			pts2 = frame.rect
+			cv2.putText(frame,verification,(pts2[0],pts2[1]),cv2.FONT_HERSHEY_SIMPLEX,1,myColor,2)
 
 			# encode OpenCV raw frame to jpg and displaying it
 			ret, jpeg = cv2.imencode('.jpg', frame)
 			return jpeg.tobytes()
-
