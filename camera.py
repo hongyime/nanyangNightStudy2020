@@ -19,44 +19,39 @@ from datetime import datetime
 import hashlib
 
 class VideoCamera(object):
-    def __init__(self):
-       #capturing video
-       self.video = cv2.VideoCapture(0)
-       self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-       self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 180)
+	def __init__(self):
+		#capturing video
+		self.video = cv2.VideoCapture(0)
+		self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+		self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 180)
 
 
-    def __del__(self):
-        #releasing camera
-        self.video.release()
+	def __del__(self):
+		#releasing camera
+		self.video.release()
 
-    def get_frame(self):
-        #extracting frames
-        with open("static/qrcodes.txt", 'r') as f:
-            qrcodes = f.read().splitlines()
+	def get_frame(self):
+		while True:
+			with open("static/qrcodes.txt", 'r') as f:
+				qrcodes = f.read().splitlines()
+			success, frame = self.video.read()
+			for i in decode(frame):
+				qrcode = i.data.decode('utf-8')
+				print(qrcode)
+				if qrcode in qrcodes:
+					verification = 'VALID QR'
+					myColor = (0,255,0)
+				else:
+					verification = 'INVALID QR'
+					myColor = (0, 0, 255)
 
-        while True:
-            success, frame = self.video.read()
-            try:
-                for i in decode(frame):
-                    qrcode = i.data.decode('utf-8')
-                    print(qrcode)
-                    if qrcode in qrcodes:
-                        verification = 'VALID QR'
-                        myColor = (0,255,0)
-                    else:
-                        verification = 'INVALID QR'
-                        myColor = (0, 0, 255)
+				pts = np.array([i.polygon],np.int32)
+				pts = pts.reshape((-1,1,2))
+				cv2.polylines(frame,[pts],True,myColor,3)
+				pts2 = i.rect
+				cv2.putText(frame,verification,(pts2[0],pts2[1]),cv2.FONT_HERSHEY_SIMPLEX,1,myColor,2)    
 
-                    pts = np.array([i.polygon],np.int32)
-                    pts = pts.reshape((-1,1,2))
-                    cv2.polylines(frame,[pts],True,myColor,3)
-                    pts2 = i.rect
-                    cv2.putText(frame,verification,(pts2[0],pts2[1]),cv2.FONT_HERSHEY_SIMPLEX,1,myColor,2)    
+			# encode OpenCV raw frame to jpg and displaying it
+			ret, jpeg = cv2.imencode('.jpg', frame)
+			return jpeg.tobytes()
 
-                # encode OpenCV raw frame to jpg and displaying it
-                ret, jpeg = cv2.imencode('.jpg', frame)
-                return jpeg.tobytes()
-            except:
-                error = sys.exc_info()[0]
-                return render_template("scan.html", error=error) 
