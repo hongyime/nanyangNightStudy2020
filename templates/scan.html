@@ -58,8 +58,21 @@
 
             <h2>NYJC NIGHT STUDY QR ADMIN PANEL</h2>
             <label><h3>Scan a QR Code</h3></label>
-            <img id="bg" src="{{ url_for('scanQR') }}" width=auto height=auto>
+            <!-- <img src="{{ url_for('video_feed') }}" width=auto height=auto> -->
+			<video autoplay="true" id="videoElement"></video>
+			<script>
+			var video = document.querySelector("#videoElement");
 
+			if (navigator.mediaDevices.getUserMedia) {
+			  navigator.mediaDevices.getUserMedia({ video: true })
+				.then(function (stream) {
+				  video.srcObject = stream;
+				})
+				.catch(function (err0r) {
+				  console.log("Something went wrong!");
+				});
+			}
+			</script>
             <label><h3>Upload a QR Code</h3></label>
             <form i='form1' method="POST" action="/verifyQR" enctype = "multipart/form-data">
                 <input type="file" name="image" accept="image/*">

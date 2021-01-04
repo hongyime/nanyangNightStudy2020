@@ -1,16 +1,38 @@
-# from shutil import Error
-# from PIL import Image
-# from pyzbar.pyzbar import decode
-# from pyzbar.pyzbar import decode
-# from PIL import Image
-# import qrcode
-# import time
-# from datetime import date, datetime
+from shutil import Error
+from PIL import Image
+from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import decode
+from PIL import Image
+import qrcode
+import time
+from datetime import date, datetime
 import hashlib
-data = 'admin'
-b_data = bytes(data, 'utf-8') #change to byte
-hash_data = hashlib.sha512(b_data).hexdigest()
-print(hash_data)
+import sys
+import os
+from PIL import Image
+import time
+from flask import Flask, render_template, request, redirect  
+from flask import *
+from flask import send_file, send_from_directory, safe_join, abort
+from main import app
+from pyzbar.pyzbar import decode
+from PIL import Image
+import qrcode
+import cv2
+import time
+from datetime import datetime
+import hashlib
+from camera import VideoCamera
+import base64
+import numpy as np
+import imutils
+from io import StringIO
+import io
+
+# data = 'admin'
+# b_data = bytes(data, 'utf-8') #change to byte
+# hash_data = hashlib.sha512(b_data).hexdigest()
+# print(hash_data)
 
 # now = datetime.now()
 # year = now.strftime("%Y")
@@ -99,3 +121,58 @@ print(hash_data)
 # print(string[-8:])
 
 
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
+
+app = Flask(__name__)
+async_mode = None
+socketio = SocketIO(app, async_mode=async_mode)
+
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
+
+@app.after_request
+def add_header(response):
+    response.cache_control.max_age = 0
+    return response
+
+@app.route('/', methods=['POST', 'GET'])
+def index():
+    return render_template('index.html')
+
+@socketio.on('image')
+def image(data_image):
+    sbuf = StringIO()
+    sbuf.write(data_image)
+
+    # decode and convert into image
+    b = io.BytesIO(base64.b64decode(data_image))
+    pimg = Image.open(b)
+
+    ## converting RGB to BGR, as opencv standards
+    frame = cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+
+    # Process the image frame
+    frame = imutils.resize(frame, width=700)
+    frame = cv2.flip(frame, 1)
+    imgencode = cv2.imencode('.jpg', frame)[1]
+
+    # base64 encode
+    stringData = base64.b64encode(imgencode).decode('utf-8')
+    b64_src = 'data:image/jpg;base64,'
+    stringData = b64_src + stringData
+
+    # emit the frame back
+    emit('response_back', stringData)
+
+if __name__ == '__main__':
+    socketio.run(app, host='127.0.0.1')

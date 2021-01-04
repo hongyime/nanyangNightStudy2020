@@ -342,10 +342,10 @@ def verifyQR():
         error = 'No image uploaded, please try again.'
         return render_template("scan.html", error=error)
 
-@app.route('/scanQR')
-def video_feed():
-    return Response(gen(VideoCamera()),
-		mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/video_feed')
+# def video_feed():
+#     return Response(gen(VideoCamera()),
+# 		mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=False, threaded=True, use_reloader=True)
