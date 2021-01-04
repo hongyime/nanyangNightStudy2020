@@ -287,11 +287,20 @@ def stop():
         error = f"You have reset the limit for QR codes back to 0."
         return render_template("admin.html", error=error)
 
-@app.route('/verify', methods=['POST','GET'])
-def verify():
+@app.route('/scan', methods=['POST','GET'])
+def scan():
     correct_user, correct_pass, start, login, limit = admin_details()
     if int(limit) > 0 and start == "True":
         return render_template("scan.html")
+    else:
+        return render_template("error.html")
+
+
+@app.route('/upload', methods=['POST','GET'])
+def upload():
+    correct_user, correct_pass, start, login, limit = admin_details()
+    if int(limit) > 0 and start == "True":
+        return render_template("upload.html")
     else:
         return render_template("error.html")
 
@@ -305,7 +314,7 @@ def verifyQR():
         file_ext = os.path.splitext(uploaded)[1]
         if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
             error = 'Invalid file extension, only upload PNG or JPEG images.'
-            return render_template("scan.html", error=error)
+            return render_template("upload.html", error=error)
         else:
 
             with open("static/qrcodes.txt", 'r') as f:
@@ -318,7 +327,7 @@ def verifyQR():
                 print(type(clean_data))
             except:
                 error = sys.exc_info()[0]
-                return render_template("scan.html", error=error) 
+                return render_template("upload.html", error=error) 
 
             if type(clean_data) is str:
                 try:
@@ -327,20 +336,20 @@ def verifyQR():
                     if str(clean_data) in clean_qrcodes:
 
                         error = "VALID QR."
-                        return render_template("scan.html", error=error)
+                        return render_template("upload.html", error=error)
                     else:
                         error = 'INVALID QR1'
-                        return render_template("scan.html", error=error)
+                        return render_template("upload.html", error=error)
   
                 except:
                     error = sys.exc_info()[0]
-                    return render_template("scan.html", error=error) 
+                    return render_template("upload.html", error=error) 
             else:
                 error = 'INVALID QR3'
-                return render_template("scan.html", error=error)
+                return render_template("upload.html", error=error)
     else:
         error = 'No image uploaded, please try again.'
-        return render_template("scan.html", error=error)
+        return render_template("upload.html", error=error)
 
 # @app.route('/video_feed')
 # def video_feed():
