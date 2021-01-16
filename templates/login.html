@@ -61,11 +61,7 @@
             <form id='form1' action='/login' method="POST">
                 <input type="text" name="username" placeholder="Username" required="required" value="{{request.form.username}}"/>
                 <input type="password" name="password" placeholder="Password" required="required" value="{{request.form.password}}"/>
-		    <form action="?" method="POST">
-      			<div class="g-recaptcha" data-sitekey="6LeKpS4aAAAAABrXNs2o5Adx9YGG8RCicK4_sgva"></div>
-			<br/>
-			<input type="submit" value="Submit">
-		    </form>
+      		<div class="g-recaptcha" data-sitekey="6LeKpS4aAAAAABrXNs2o5Adx9YGG8RCicK4_sgva"></div>
                 <button id="button" type="submit" class="btn btn-primary btn-block btn-large">Login</button>
             </form>
 	    
