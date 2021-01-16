@@ -103,9 +103,9 @@ def checkRecaptcha(response, secretkey):
         url = url + '&response=' +str(response)
 
         jsonobj = json.loads(urllib2.urlopen(url).read())
-        print jsonobj['success']
+        print(jsonobj['success'])
         if jsonobj['success']:
-            print jsonobj['success']
+            print(jsonobj['success'])
             return True
         else:
             return False
