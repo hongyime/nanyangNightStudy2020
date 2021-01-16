@@ -52,6 +52,7 @@
             }
 
         </style>
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
         
@@ -62,6 +63,11 @@
                 <input type="password" name="password" placeholder="Password" required="required" value="{{request.form.password}}"/>
                 <button id="button" type="submit" class="btn btn-primary btn-block btn-large">Login</button>
             </form>
+	    <form action="?" method="POST">
+      		<div class="g-recaptcha" data-sitekey="your_site_key"></div>
+      		<br/>
+      		<input type="submit" value="Submit">
+    	    </form>
         </div>
         <div class = error>
             {% if error is not none %}
