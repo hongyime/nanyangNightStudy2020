@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+from urllib.request import *
 from PIL import Image
 import time
 from flask import Flask, render_template, request, redirect  
@@ -102,7 +103,7 @@ def checkRecaptcha(response, secretkey):
         url = url + 'secret=' + str(secretkey)
         url = url + '&response=' +str(response)
 
-        jsonobj = json.loads(urllib2.urlopen(url).read())
+        jsonobj = json.loads(urlopen(url).read())
         print(jsonobj['success'])
         if jsonobj['success']:
             print(jsonobj['success'])
