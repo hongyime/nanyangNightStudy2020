@@ -8,7 +8,7 @@
         <title>
             NYJC NIGHT STUDY QR GENERATOR
         </title>
-		<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='nanyang.png') }}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='nanyang.png') }}">
         <link href='https://fonts.googleapis.com/css?fam  ily=Pacifico' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
@@ -52,6 +52,7 @@
                 font-size: 20px;
             }
         </style>
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
         <h2>NYJC NIGHT STUDY QR GENERATOR</h2>
@@ -64,6 +65,7 @@
             <label><h3>Generate your QR code here to collect your food later on!</h3></label>
 
             <form id='form1' action='/display' method='GET'>
+		<div class="g-recaptcha" data-sitekey="6LeKpS4aAAAAABrXNs2o5Adx9YGG8RCicK4_sgva"></div>
                 <button id='button' type="submit" class="btn btn-primary btn-block btn-large">Generate</button>
             </form>
 
