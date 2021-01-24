@@ -151,10 +151,16 @@ def root():
     if start == 'False' or int(limit) <= 0:
         return render_template('error.html')
     elif start == "True" and int(limit) > 0:
-        with open('static/qrcodes.txt', 'r') as f:
-            clean_qrcodes = f.read().splitlines()
-        error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
-        return render_template('generate.html', error=error)
+        response = request.form.get('g-recaptcha-response')
+        if checkRecaptcha(response, RECAPTCHA_PRIVATE_KEY):
+            
+            with open('static/qrcodes.txt', 'r') as f:
+                clean_qrcodes = f.read().splitlines()
+            error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
+            return render_template('generate.html', error=error)
+        else:
+            error = "Captcha failed."
+            return render_template('generate.html', error=error)
     else:
         return render_template('error.html')
 
