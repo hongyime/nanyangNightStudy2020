@@ -147,10 +147,21 @@ def add_header(response):
 
 @app.route('/', methods=["POST",'GET'])
 def root():
-    with open('static/qrcodes.txt', 'r') as f:
+       
+    correct_user, correct_pass, start, login, limit = admin_details()
+
+    if start == 'False' or int(limit) <= 0:
+        return render_template('error.html')
+
+    elif start == "True" and int(limit) > 0:
+        with open('static/qrcodes.txt', 'r') as f:
         clean_qrcodes = f.read().splitlines()
-    error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
-    return render_template('generate.html', error=error)
+        error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
+        return render_template('generate.html', error=error)
+
+    else:
+        return render_template('error.html')
+
 
 @app.route('/generate', methods=["POST",'GET'])
 def generate():
