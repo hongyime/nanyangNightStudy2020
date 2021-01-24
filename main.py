@@ -145,7 +145,7 @@ def add_header(response):
     response.cache_control.max_age = 0
     return response
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=["POST",'GET'])
 def root():
     if request.method == "GET":
         correct_user, correct_pass, start, login, limit = admin_details()
