@@ -147,7 +147,14 @@ def add_header(response):
 
 @app.route('/', methods=["POST",'GET'])
 def root():
-    if request.method == "GET":
+    with open('static/qrcodes.txt', 'r') as f:
+        clean_qrcodes = f.read().splitlines()
+    error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
+    return render_template('generate.html', error=error)
+
+@app.route('/generate', methods=["POST",'GET'])
+def generate():
+    if request.method == "POST":
         correct_user, correct_pass, start, login, limit = admin_details()
         
         if start == 'False' or int(limit) <= 0:
@@ -156,11 +163,8 @@ def root():
         elif start == "True" and int(limit) > 0:
             response = request.form.get('g-recaptcha-response')
             if checkRecaptcha(response, RECAPTCHA_PRIVATE_KEY):
+                return redirect(url_for("display"))
 
-                with open('static/qrcodes.txt', 'r') as f:
-                    clean_qrcodes = f.read().splitlines()
-                error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
-                return render_template('generate.html', error=error)
             else:
                 error = "Captcha failed."
                 return render_template('generate.html', error=error)
