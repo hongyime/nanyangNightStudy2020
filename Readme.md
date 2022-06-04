@@ -9,4 +9,4 @@ code to create a night study website to generate QR codes.
 1. NONE
 
 ## Demo:
-https://nanyang-nightstudyapp.herokuapp.com/
+1. NONE
