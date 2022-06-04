@@ -11,7 +11,7 @@ import sys
 import os
 from PIL import Image
 import time
-from flask import Flask, render_template, request, redirect  
+from flask import Flask, render_template, request, redirect
 from flask import *
 from flask import send_file, send_from_directory, safe_join, abort
 from main import app
@@ -128,6 +128,7 @@ app = Flask(__name__)
 async_mode = None
 socketio = SocketIO(app, async_mode=async_mode)
 
+
 @app.after_request
 def add_header(r):
     """
@@ -140,14 +141,17 @@ def add_header(r):
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
+
 @app.after_request
 def add_header(response):
     response.cache_control.max_age = 0
     return response
 
+
 @app.route('/', methods=['POST', 'GET'])
 def index():
     return render_template('index.html')
+
 
 @socketio.on('image')
 def image(data_image):
@@ -158,7 +162,7 @@ def image(data_image):
     b = io.BytesIO(base64.b64decode(data_image))
     pimg = Image.open(b)
 
-    ## converting RGB to BGR, as opencv standards
+    # converting RGB to BGR, as opencv standards
     frame = cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
 
     # Process the image frame
@@ -173,6 +177,7 @@ def image(data_image):
 
     # emit the frame back
     emit('response_back', stringData)
+
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1')
