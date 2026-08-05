@@ -160,7 +160,7 @@ def root():
 
     elif start == "True" and int(limit) > 0:
         with open('static/qrcodes.txt', 'r') as f:
-        clean_qrcodes = f.read().splitlines()
+            clean_qrcodes = f.read().splitlines()
         error = f"{len(clean_qrcodes)}/{limit} packages of food redeemed."
         return render_template('generate.html', error=error)
 
