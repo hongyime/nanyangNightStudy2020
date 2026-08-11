@@ -1,4 +1,8 @@
 # nanyangNightStudy2020
+
+
+![Project screenshot](./screenshot.png)
+
 code to create a night study website to generate QR codes.
 
 <p align="left">
