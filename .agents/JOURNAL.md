@@ -10,3 +10,5 @@
 - Heroku Procfile + runtime.txt present
 - Treat as archived legacy project
 - No action required
+
+- 2026-09-27: Remove the optional personal security contact and preserve private reporting guidance through a reviewed maintenance pull request.
